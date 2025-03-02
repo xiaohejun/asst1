@@ -35,7 +35,15 @@ void workerThreadStart(WorkerArgs * const args) {
     // program that uses two threads, thread 0 could compute the top
     // half of the image and thread 1 could compute the bottom half.
 
-    printf("Hello world from thread %d\n", args->threadId);
+    int h = args->height / args->numThreads;
+    int startRows = args->threadId * h;
+    int totalRows = h;
+    // 最后一个thread计算剩下所有的
+    if (args->threadId == args->numThreads - 1) {
+        totalRows += args->height % args->numThreads;
+    }
+    // printf("Hello world from thread %d, startRows %d, totalRows %d\n", args->threadId, startRows, totalRows);
+    mandelbrotSerial(args->x0, args->y0, args->x1, args->y1, args->width, args->height, startRows, totalRows, args->maxIterations, args->output);
 }
 
 //
@@ -49,9 +57,9 @@ void mandelbrotThread(
     int width, int height,
     int maxIterations, int output[])
 {
-    static constexpr int MAX_THREADS = 32;
+    static constexpr int MAX_THREADS = 48;
 
-    if (numThreads > MAX_THREADS)
+    if (numThreads > MAX_THREADS || numThreads < 2)
     {
         fprintf(stderr, "Error: Max allowed threads is %d\n", MAX_THREADS);
         exit(1);

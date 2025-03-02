@@ -72,6 +72,7 @@ int main(int argc, char** argv) {
     const unsigned int height = 1200;
     const int maxIterations = 256;
     int numThreads = 2;
+    int viewIndex = 1;
 
     float x0 = -2;
     float x1 = 1;
@@ -97,7 +98,7 @@ int main(int argc, char** argv) {
         }
         case 'v':
         {
-            int viewIndex = atoi(optarg);
+            viewIndex = atoi(optarg);
             // change view settings
             if (viewIndex == 2) {
                 float scaleValue = .015f;
@@ -129,7 +130,7 @@ int main(int argc, char** argv) {
 
     double minSerial = 1e30;
     for (int i = 0; i < 5; ++i) {
-       memset(output_serial, 0, width * height * sizeof(int));
+        memset(output_serial, 0, width * height * sizeof(int));
         double startTime = CycleTimer::currentSeconds();
         mandelbrotSerial(x0, y0, x1, y1, width, height, 0, height, maxIterations, output_serial);
         double endTime = CycleTimer::currentSeconds();
@@ -137,7 +138,9 @@ int main(int argc, char** argv) {
     }
 
     printf("[mandelbrot serial]:\t\t[%.3f] ms\n", minSerial * 1000);
-    writePPMImage(output_serial, width, height, "mandelbrot-serial.ppm", maxIterations);
+    char file[64] = {'\0'};
+    snprintf(file, sizeof(file), "mandelbrot-serial-v%d.ppm", viewIndex);
+    writePPMImage(output_serial, width, height, "file", maxIterations);
 
     //
     // Run the threaded version
@@ -153,7 +156,8 @@ int main(int argc, char** argv) {
     }
 
     printf("[mandelbrot thread]:\t\t[%.3f] ms\n", minThread * 1000);
-    writePPMImage(output_thread, width, height, "mandelbrot-thread.ppm", maxIterations);
+    snprintf(file, sizeof(file), "mandelbrot-thread-v%d.ppm", viewIndex);
+    writePPMImage(output_thread, width, height, file, maxIterations);
 
     if (! verifyResult (output_serial, output_thread, width, height)) {
         printf ("Error : Output from threads does not match serial output\n");

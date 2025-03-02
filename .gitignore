@@ -1,0 +1,7 @@
+*ppm
+objs
+prog1_mandelbrot_threads/mandelbrot
+*jpg
+*bmp
+.venv
+prog*.txt
